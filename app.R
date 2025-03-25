@@ -1,11 +1,12 @@
 library(shiny)
 library(shinythemes)
+library(shinyjs)
 library(dplyr)
 library(tidyr)
 library(DT)
 library(vcfR)
 
-# === Функция для загрузки VCF ===
+# === Function to Load VCF ===
 load_vcf <- function(file) {
   vcf <- read.vcfR(file$datapath)
   vcf_df <- as.data.frame(vcf@fix)
@@ -27,19 +28,28 @@ load_vcf <- function(file) {
 
 # === UI ===
 ui <- fluidPage(
-  # theme = shinytheme("lumen"), # Изменяем тему
+  useShinyjs(),
   titlePanel("VEPViewer"),
   
-  sidebarLayout(
-    sidebarPanel(
-      fileInput("vcf_file", "Загрузите VCF/VEP файл", accept = c(".vcf", ".vep")),
-      actionButton("select_all", "Выбрать все"),
-      actionButton("clear_all", "Сбросить"),
-      checkboxGroupInput("columns", "Выберите колонки", choices = NULL),
-      downloadButton("download_csv", "Скачать CSV")
+  fluidRow(
+    column(
+      width = 3, id = "sidebar",
+      wellPanel(
+        fileInput("vcf_file", "Upload VCF/VEP file", accept = c(".vcf", ".vep")),
+        actionButton("select_all", "Select All"),
+        actionButton("clear_all", "Clear"),
+        div(style = "overflow-y: auto; max-height: 300px;",  # Добавляем прокрутку
+            checkboxGroupInput("columns", "Select columns", choices = NULL)
+        )
+      )
     ),
-    mainPanel(
-      DTOutput("vcf_table")
+    
+    column(
+      width = 9,
+      actionButton("toggle_sidebar", "Show/Hide Panel"),
+      DTOutput("vcf_table"),
+      br(),  # Добавляет отступ перед кнопкой
+      downloadButton("download_csv", "Download CSV")
     )
   )
 )
@@ -76,22 +86,24 @@ server <- function(input, output, session) {
     datatable(filtered_data(), 
               options = list(pageLength = 10, autoWidth = TRUE), 
               filter = "top")
-  }, server = FALSE)  # ВАЖНО: server = FALSE, чтобы фильтрация работала на клиенте!
+  }, server = FALSE)
   
   output$download_csv <- downloadHandler(
     filename = function() {
       paste0("filtered_data_", Sys.Date(), ".csv")
     },
     content = function(file) {
-      req(input$vcf_table_rows_all)  # Проверяем, есть ли видимые строки после фильтрации
-      
-      filtered_rows <- input$vcf_table_rows_all  # Получаем индексы отфильтрованных строк
-      export_data <- filtered_data()[filtered_rows, , drop = FALSE]  # Оставляем только видимые строки
-      
-      write.csv2(export_data, file, row.names = FALSE)  # Сохраняем в CSV с `;`
+      req(input$vcf_table_rows_all)  
+      filtered_rows <- input$vcf_table_rows_all  
+      export_data <- filtered_data()[filtered_rows, , drop = FALSE]  
+      write.csv2(export_data, file, row.names = FALSE)  
     }
   )
+  
+  observeEvent(input$toggle_sidebar, {
+    toggle("sidebar")
+  })
 }
 
-# === Запуск приложения ===
+# === Launch app ===
 shinyApp(ui, server)
