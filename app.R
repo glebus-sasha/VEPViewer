@@ -27,7 +27,7 @@ load_vcf <- function(file) {
 
 # === UI ===
 ui <- fluidPage(
-  theme = shinytheme("cerulean"), # Изменяем тему
+  #theme = shinytheme("lumen"), # Изменяем тему
   titlePanel("VEPViewer"),
   
   sidebarLayout(
