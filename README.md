@@ -53,11 +53,6 @@ Run the `run.sh` script:
 ./run.sh
 ```
 
-Alternatively, run from R:
-```r
-shiny::runApp("app.R", launch.browser = TRUE)
-```
-
 ## Usage
 - Upload a `.vcf` or `.vep` file.
 - Use the interactive table to filter and explore variants.
