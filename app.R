@@ -27,7 +27,7 @@ load_vcf <- function(file) {
 
 # === UI ===
 ui <- fluidPage(
-  #theme = shinytheme("lumen"), # Изменяем тему
+  # theme = shinytheme("lumen"), # Изменяем тему
   titlePanel("VEPViewer"),
   
   sidebarLayout(
@@ -35,7 +35,8 @@ ui <- fluidPage(
       fileInput("vcf_file", "Загрузите VCF/VEP файл", accept = c(".vcf", ".vep")),
       actionButton("select_all", "Выбрать все"),
       actionButton("clear_all", "Сбросить"),
-      checkboxGroupInput("columns", "Выберите колонки", choices = NULL)
+      checkboxGroupInput("columns", "Выберите колонки", choices = NULL),
+      downloadButton("download_csv", "Скачать CSV")
     ),
     mainPanel(
       DTOutput("vcf_table")
@@ -65,12 +66,31 @@ server <- function(input, output, session) {
     updateCheckboxGroupInput(session, "columns", selected = character(0))
   })
   
-  output$vcf_table <- renderDT({
+  filtered_data <- reactive({
     req(vcf_data())
-    datatable(vcf_data()[, input$columns, drop = FALSE], 
+    vcf_data()[, input$columns, drop = FALSE]
+  })
+  
+  output$vcf_table <- renderDT({
+    req(filtered_data())
+    datatable(filtered_data(), 
               options = list(pageLength = 10, autoWidth = TRUE), 
               filter = "top")
-  })
+  }, server = FALSE)  # ВАЖНО: server = FALSE, чтобы фильтрация работала на клиенте!
+  
+  output$download_csv <- downloadHandler(
+    filename = function() {
+      paste0("filtered_data_", Sys.Date(), ".csv")
+    },
+    content = function(file) {
+      req(input$vcf_table_rows_all)  # Проверяем, есть ли видимые строки после фильтрации
+      
+      filtered_rows <- input$vcf_table_rows_all  # Получаем индексы отфильтрованных строк
+      export_data <- filtered_data()[filtered_rows, , drop = FALSE]  # Оставляем только видимые строки
+      
+      write.csv2(export_data, file, row.names = FALSE)  # Сохраняем в CSV с `;`
+    }
+  )
 }
 
 # === Запуск приложения ===
