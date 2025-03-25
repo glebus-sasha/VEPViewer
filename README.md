@@ -1,7 +1,25 @@
 # VEPViewer
 A Shiny app for interactive visualization of VCF/VEP files, allowing users to upload, filter, and explore variant data.
-
 ## Installation
+
+Before running the application, ensure that R and the required dependencies are installed.
+
+### Install R and R packages:
+1. **Install R:**  
+   - **Windows:** Download and install R from [CRAN](https://cran.r-project.org/).  
+   - **Linux (Debian/Ubuntu-based):**  
+     ```bash
+     sudo apt update && sudo apt install r-base
+     ```
+   - **Linux (RedHat-based):**  
+     ```bash
+     sudo dnf install R
+     ```
+  
+2. **Install required R packages:**  
+   Open R or RStudio and run:
+   ```r
+   install.packages(c("shiny", "DT", "dplyr", "tidyr", "vcfR"))
 
 ### Prerequisites
 Make sure you have R and the required packages installed:
