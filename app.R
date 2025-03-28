@@ -56,6 +56,7 @@ ui <- fluidPage(
 
 # === SERVER ===
 server <- function(input, output, session) {
+  options(shiny.maxRequestSize=30 * 1024 * 1024 * 1024 * 1024) 
   vcf_data <- reactiveVal(NULL)
   
   observeEvent(input$vcf_file, {
