@@ -19,7 +19,7 @@ Before running the application, ensure that R and the required dependencies are 
 2. **Install required R packages:**  
    Open R or RStudio and run:
    ```r
-   install.packages(c("shiny", "DT", "dplyr", "tidyr", "vcfR", "shinyjs"))
+   install.packages(c("shiny", "DT", "dplyr", "tidyr", "vcfR", "shinyjs", "shinythemes"))
 
 ### Prerequisites
 
